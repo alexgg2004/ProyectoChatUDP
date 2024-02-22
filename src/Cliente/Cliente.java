@@ -105,6 +105,7 @@ public class Cliente extends JFrame {
             }
         });
 
+        // En el caso de cerrar la aplicación enviar un mensaje de salida
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -130,29 +131,32 @@ public class Cliente extends JFrame {
                 socket.receive(recibe);
                 mensaje = new String(recibe.getData(), 0, recibe.getLength());
                 if(mensaje.equalsIgnoreCase("/fail")) {
+                    // Control de usuarios con el mismo nombre
                     JOptionPane.showMessageDialog(null, "El nombre de usuario ya está en uso");
                     socket.leaveGroup(grupo);
                     System.exit(0);
                 } else {
                     if(mensaje.startsWith("/nick")) {
+                        // Usuario aceptado
                         String nombre = mensaje.substring(5);
                         nombreUsuarios.add(nombre);
                     } else if(mensaje.startsWith("/usuarios")) {
-                        System.out.println(mensaje);
+                        // Lista de usuarios actualizada
                         String[] datos = mensaje.substring(9).split(" ");
                         nombreUsuarios.clear();
                         for(int i=0; i< datos.length; i++) {
                             if(!datos[i].isEmpty()) {
                                 nombreUsuarios.add(datos[i]);
-                                System.out.println(datos[i]);
                             }
                         }
                         actualizarNombresUsuarios(nombreUsuarios);
                     } else if(mensaje.startsWith("/out")) {
+                        // Cliente desconectado, eliminar de la lista
                         nombreUsuarios.remove(mensaje.substring(4));
                         actualizarNombresUsuarios(nombreUsuarios);
                     } else {
-
+                        // Esto sirve para controlar que no se muestre el mismo mensaje a la vez dos veces
+                        // Es un error que me ocurría al probar los clientes y usando esto se soluciona
                         String mensajeCliente = mensaje.substring(mensaje.indexOf(":") + 2);
                         if(!mensajes.contains(mensajeCliente)) {
                             textArea1.append(mensaje + "\n");

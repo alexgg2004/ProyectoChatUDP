@@ -13,11 +13,10 @@ public class Servidor {
     private MulticastSocket socket;
     private InetAddress grupo;
     private String nombre;
-    private Map<String, InetAddress> usuarios;
-    public static List<String> nombresUsuarios = new ArrayList<>();
+    public static List<String> nombresUsuarios;
 
     public Servidor() {
-        usuarios = new HashMap<>();
+        nombresUsuarios = new ArrayList<>();
     }
 
     public static void main(String[] args) {
@@ -42,19 +41,25 @@ public class Servidor {
                 int puertoCliente = recibe.getPort();
 
                 if(mensaje.startsWith("/nick") && nombresUsuarios.contains(mensaje.substring(5))) {
+                    // Comprobación de los clientes conectados
                     nombre = mensaje.substring(5);
                     System.out.println("El usuario " + nombre + " ya existe");
                     enviarMensaje("/fail", direccionCliente);
                 } else {
-                    System.out.println("Mensaje recibido -> " + mensaje);
+                    if(!mensaje.startsWith("/nick") && !mensaje.startsWith("/out") && !mensaje.startsWith("/usuarios")) {
+                        // Muestra solo mensajes
+                        System.out.println("Mensaje recibido -> " + mensaje);
+                    }
                     if(mensaje.startsWith("/nick")) {
+                        // Conexión de un cliente
                         nombre = mensaje.substring(5);
-                        usuarios.put(nombre, direccionCliente);
+                        System.out.println("El cliente " + nombre + " se ha conectado");
                         nombresUsuarios.add(nombre);
                         notificarConexionUsuarios();
                     } else if(mensaje.startsWith("/out")) {
-                        System.out.println(mensaje.substring(4));
-                        usuarios.remove(mensaje.substring(4));
+                        // Desconexión de un cliente
+                        nombre = mensaje.substring(4);
+                        System.out.println("El cliente " + nombre + " se ha desconectado");
                         nombresUsuarios.remove(mensaje.substring(4));
                         notificarConexionUsuarios();
                     } else {
@@ -63,15 +68,7 @@ public class Servidor {
                 }
             }
         } catch (IOException e) {
-            if (nombre != null) {
-                System.err.println("El cliente " + nombre + " se ha desconectado");
-                usuarios.remove(nombre);
-                notificarConexionUsuarios();
-            } else {
-                System.err.println("Se ha producido un error al recibir mensajes");
-                socket.close();
-                e.printStackTrace();
-            }
+            System.err.println("Error al leer mensajes");
         }
     }
 
@@ -96,11 +93,11 @@ public class Servidor {
     }
 
     private void notificarConexionUsuarios() {
+        // Método para actualizar la lista de usuarios en los clientes
         StringBuilder usuariosConectados = new StringBuilder();
         usuariosConectados.append("/usuarios");
-        for(String nombreUsuario: usuarios.keySet()) {
+        for(String nombreUsuario: nombresUsuarios) {
             usuariosConectados.append(" ").append(nombreUsuario);
-            System.out.println(nombreUsuario);
         }
         enviarMensajeGrupo(usuariosConectados.toString());
     }
