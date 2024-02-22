@@ -108,6 +108,7 @@ public class Cliente extends JFrame {
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                nombresUsuarios.remove(nombreUsuario);
                 enviarMensaje("/out" + nombreUsuario);
             }
         });

@@ -41,7 +41,7 @@ public class Servidor {
                 InetAddress direccionCliente = recibe.getAddress();
                 int puertoCliente = recibe.getPort();
 
-                if(mensaje.startsWith("/nick") && usuarios.containsKey(mensaje.substring(5))) {
+                if(mensaje.startsWith("/nick") && nombresUsuarios.contains(mensaje.substring(5))) {
                     nombre = mensaje.substring(5);
                     System.out.println("El usuario " + nombre + " ya existe");
                     enviarMensaje("/fail", direccionCliente);
@@ -52,7 +52,8 @@ public class Servidor {
                         usuarios.put(nombre, direccionCliente);
                         nombresUsuarios.add(nombre);
                         notificarConexionUsuarios();
-                    } else if(mensaje.equals("/out")) {
+                    } else if(mensaje.startsWith("/out")) {
+                        System.out.println(mensaje.substring(4));
                         usuarios.remove(mensaje.substring(4));
                         nombresUsuarios.remove(mensaje.substring(4));
                         notificarConexionUsuarios();
@@ -102,9 +103,5 @@ public class Servidor {
             System.out.println(nombreUsuario);
         }
         enviarMensajeGrupo(usuariosConectados.toString());
-        /* for(InetAddress direccion: usuarios.values()) {
-            enviarMensaje(usuariosConectados.toString(), direccion);
-            System.out.println(direccion);
-        } */
     }
 }
