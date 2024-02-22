@@ -1,6 +1,5 @@
 package Cliente;
 
-import Hilos.HiloCliente;
 import Servidor.Servidor;
 
 import javax.swing.*;
